@@ -159,8 +159,9 @@ class OverlayShowingService : Service() {
 
         //        TODO this is duplicated
         //        TODO actual bottom place is calculated incorrectly due to the status bar...
-        val bounds =
-            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(overlayPaintingView.context).bounds
+        val displayMetrics = resources.displayMetrics
+        val bounds = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+
         topLeftParams.x = bounds.left
         topLeftParams.y = bounds.top
 
@@ -182,8 +183,8 @@ class OverlayShowingService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSurfaceView() {
         touchHelper = TouchHelper.create(overlayPaintingView, 2, callback)
-        val bounds =
-            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(overlayPaintingView.context).bounds
+        val displayMetrics = resources.displayMetrics
+        val bounds = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
 
         overlayPaintingView.addOnLayoutChangeListener(object : OnLayoutChangeListener {
             override fun onLayoutChange(
