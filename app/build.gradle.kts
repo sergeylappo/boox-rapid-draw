@@ -11,8 +11,8 @@ android {
         applicationId = "com.sergeylappo.booxrapiddraw"
         minSdk = 28
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.0.2-alpha"
+        versionCode = 3
+        versionName = "0.0.3-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
