@@ -57,7 +57,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.activity.fragment)
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation(libs.androidx.core.ktx)
 
     implementation(libs.androidx.window)
     implementation(libs.bundles.onyx)
