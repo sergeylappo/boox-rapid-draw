@@ -13,17 +13,21 @@ android {
         targetSdk = 34
         versionCode = 2
         versionName = "0.0.2-alpha"
-        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        ndk {
+            //abiFilters += "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            abiFilters += "arm64-v8a"
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,9 +41,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures {
-        compose = true
-    }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
@@ -51,22 +52,14 @@ android {
         jniLibs {
             pickFirsts += "lib/*/libc++_shared.so"
         }
-        resources {
-            pickFirsts += "androidsupportmultidexversion.txt"
-        }
     }
 }
 
 dependencies {
-    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.activity.fragment)
+    implementation("androidx.core:core-ktx:1.13.1")
 
     implementation(libs.androidx.window)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.multidex)
     implementation(libs.bundles.onyx)
     implementation(libs.hiddenapibypass)
-
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 }

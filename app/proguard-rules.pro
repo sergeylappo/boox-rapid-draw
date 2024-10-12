@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-dontwarn org.joda.convert.**
+-dontwarn org.slf4j.impl.**
+-keep class org.joda.time.** { *; }
+-keep class org.slf4j.** { *; }

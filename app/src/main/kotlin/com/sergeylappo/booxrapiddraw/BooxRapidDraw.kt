@@ -1,17 +1,11 @@
 package com.sergeylappo.booxrapiddraw
 
-import android.content.Context
+import android.app.Application
 import android.os.Build
-import androidx.multidex.MultiDex
-import androidx.multidex.MultiDexApplication
 import com.onyx.android.sdk.rx.RxManager
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
-class BooxRapidDraw : MultiDexApplication() {
-    override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
-        MultiDex.install(this@BooxRapidDraw)
-    }
+class BooxRapidDraw : Application() {
 
     override fun onCreate() {
         super.onCreate()
