@@ -131,17 +131,6 @@ class OverlayShowingService : Service() {
     }
 
     private fun createOverlayPaintingView() {
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.TRANSPARENT
-        )
-
-        params.gravity = Gravity.START or Gravity.TOP
-        params.x = 0
-        params.y = 0
         overlayPaintingView = SurfaceView(this)
         overlayPaintingView.setZOrderOnTop(true)
         overlayPaintingView.holder.setFormat(PixelFormat.TRANSPARENT)
@@ -151,7 +140,7 @@ class OverlayShowingService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSPARENT
         )
         topLeftParams.alpha = 0.2f
