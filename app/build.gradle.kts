@@ -20,7 +20,6 @@ android {
         }
 
         ndk {
-            //abiFilters += "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
             abiFilters += setOf("armeabi-v7a", "arm64-v8a")
         }
     }
@@ -58,7 +57,6 @@ android {
 dependencies {
     implementation(libs.androidx.activity.fragment)
     implementation(libs.androidx.core.ktx)
-
     implementation(libs.androidx.window)
     implementation(libs.bundles.onyx)
     implementation(libs.hiddenapibypass)
