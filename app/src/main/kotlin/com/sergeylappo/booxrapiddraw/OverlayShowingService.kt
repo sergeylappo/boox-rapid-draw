@@ -28,6 +28,7 @@ import com.onyx.android.sdk.data.note.TouchPoint
 import com.onyx.android.sdk.pen.RawInputCallback
 import com.onyx.android.sdk.pen.TouchHelper
 import com.onyx.android.sdk.pen.data.TouchPointList
+import kotlin.math.abs
 import kotlin.system.exitProcess
 
 private const val CHANNEL_ID = "rapid_draw_channel_overlay_01"
@@ -146,23 +147,34 @@ class OverlayShowingService : Service() {
         writingToggleButton.setTextColor(Color.WHITE)
 
         writingToggleButton.setOnTouchListener(object : OnTouchListener {
+            private var initialRawX = 0f
+            private var initialRawY = 0f
+
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 if (gestureDetector.onTouchEvent(event)) {
                     return true
                 }
 
-                if (event.action == MotionEvent.ACTION_MOVE || event.action == MotionEvent.ACTION_DOWN) {
-                    /* You can play around with the offset to set where you want the users finger to be on the view. Currently it should be centered.*/
-                    val xOffset = v.width / 2
-                    val yOffset = v.height / 2
-                    buttonParams.x = event.rawX.toInt() - xOffset
-                    buttonParams.y = event.rawY.toInt() - yOffset
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        initialRawX = event.rawX
+                        initialRawY = event.rawY
+                        return true
+                    }
 
-                    wm.updateViewLayout(writingToggleButton, buttonParams)
-                    return true
-                }
-                if (event.action == MotionEvent.ACTION_BUTTON_PRESS) {
-                    return false
+                    MotionEvent.ACTION_MOVE -> {
+                        val xOffset = v.width / 2
+                        val yOffset = v.height / 2
+                        val deltaX = event.rawX - initialRawX
+                        val deltaY = event.rawY - initialRawY
+
+                        if (abs(deltaX) > 50 || abs(deltaY) > 50) {
+                            buttonParams.x = event.rawX.toInt() - xOffset
+                            buttonParams.y = event.rawY.toInt() - yOffset
+                            wm.updateViewLayout(writingToggleButton, buttonParams)
+                            return true
+                        }
+                    }
                 }
                 return false
             }
