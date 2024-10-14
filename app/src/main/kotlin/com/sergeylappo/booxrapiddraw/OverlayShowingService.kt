@@ -3,6 +3,7 @@ package com.sergeylappo.booxrapiddraw
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -18,12 +19,10 @@ import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
 import android.view.View.OnLayoutChangeListener
-import android.view.View.OnTouchListener
 import android.view.WindowManager
 import android.widget.Button
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import androidx.window.layout.WindowMetricsCalculator
 import com.onyx.android.sdk.api.device.epd.EpdController
 import com.onyx.android.sdk.data.note.TouchPoint
 import com.onyx.android.sdk.pen.RawInputCallback
@@ -37,6 +36,12 @@ private const val STROKE_WIDTH = 3.0f
 //TODO need to detect pen-up event to increase responsiveness, so that can start raw drawing while reading that pen is near
 //Or would require schedule or timer to clean-up after retrieving a pen-down event
 class OverlayShowingService : Service() {
+
+    companion object {
+        private const val PREFS_NAME = "MyServicePrefs"
+        private const val KEY_IS_RUNNING = "isRunning"
+    }
+
     private val paint = Paint()
 
     private lateinit var touchHelper: TouchHelper
@@ -50,84 +55,67 @@ class OverlayShowingService : Service() {
 
     override fun onBind(intent: Intent) = null
 
-    //    TODO won't this cause a leak?!
-    class ClickToStopServiceGestureDetector(private val context: Context) : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-            context.stopService(Intent(context, OverlayShowingService::class.java))
-            exitProcess(0)
-        }
-    }
-
     override fun onCreate() {
         super.onCreate()
-        val channel = NotificationChannel(
-            CHANNEL_ID, "Boox Rapid draw overlay service", NotificationManager.IMPORTANCE_DEFAULT
-        )
 
-        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
-
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.overlay_service_notification_content_title))
-            .setContentText(getString(R.string.overlay_service_notification_content))
-            .setSmallIcon(R.mipmap.ic_launcher_round)
-            .build()
-
-        //noinspection InlinedApi (Seems to work, IDK why, maybe older Android versions might not support this)
-        ServiceCompat.startForeground(this, 1, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        createForegroundNotification()
 
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
 
-        createExitButton()
         createOverlayPaintingView()
 
         initPaint()
         initSurfaceView()
     }
 
-    //    TODO fix suppress
-    @SuppressLint("ClickableViewAccessibility")
-    private fun createExitButton() {
-        val buttonParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.TRANSPARENT
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "STOP") {
+            stopSelf()
+            exitProcess(0)
+        }
+
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val isRunning = prefs.getBoolean(KEY_IS_RUNNING, false)
+
+        if (isRunning) {
+            stopSelf()
+            return START_NOT_STICKY // Prevents service from being recreated
+        }
+
+        // Set the flag to indicate that the service is now running
+        prefs.edit().putBoolean(KEY_IS_RUNNING, true).apply()
+
+        return START_STICKY // Service will be recreated if killed
+    }
+
+    private fun createForegroundNotification() {
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        notificationManager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ID,
+                "Boox Rapid draw overlay service",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
         )
-        buttonParams.gravity = Gravity.START or Gravity.TOP
-        buttonParams.x = 0
-        buttonParams.y = 0
-        overlayButton = Button(this)
-        val gestureDetector = GestureDetector(this, ClickToStopServiceGestureDetector(this))
-        overlayButton.text = getString(R.string.exit)
-        overlayButton.setTextColor(Color.WHITE)
 
-        overlayButton.setOnTouchListener(object : OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                if (gestureDetector.onTouchEvent(event)) {
-                    return true
-                }
+        // add notification intent to finish the service
+        val pendingIntent = PendingIntent.getService(
+            this,
+            0,
+            Intent(this, OverlayShowingService::class.java).apply { action = "STOP" },
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-                if (event.action == MotionEvent.ACTION_MOVE || event.action == MotionEvent.ACTION_DOWN) {
-                    /* You can play around with the offset to set where you want the users finger to be on the view. Currently it should be centered.*/
-                    val xOffset = v.width / 2
-                    val yOffset = v.height / 2
-                    buttonParams.x = event.rawX.toInt() - xOffset
-                    buttonParams.y = event.rawY.toInt() - yOffset
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.overlay_service_notification_content_title))
+            .setContentText(getString(R.string.overlay_service_notification_content))
+            .setSmallIcon(R.drawable.rapid_draw)
+            .setContentIntent(pendingIntent)
+            .build()
 
-                    wm.updateViewLayout(overlayButton, buttonParams)
-                    return true
-                }
-                if (event.action == MotionEvent.ACTION_BUTTON_PRESS) {
-                    return false
-                }
-                return false
-            }
-        })
-        overlayButton.setBackgroundColor(Color.BLACK)
-        overlayButton.background.alpha = 100
-
-        wm.addView(overlayButton, buttonParams)
+        //noinspection InlinedApi (Seems to work, IDK why, maybe older Android versions might not support this)
+        ServiceCompat.startForeground(this, 1, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
     }
 
     private fun createOverlayPaintingView() {
@@ -172,6 +160,10 @@ class OverlayShowingService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSurfaceView() {
         touchHelper = TouchHelper.create(overlayPaintingView, 2, callback)
+        touchHelper.setStrokeColor(Color.BLACK)
+        touchHelper.setStrokeStyle(TouchHelper.STROKE_STYLE_PENCIL)
+        touchHelper.openRawDrawing()
+
         val displayMetrics = resources.displayMetrics
         val bounds = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
 
@@ -187,14 +179,9 @@ class OverlayShowingService : Service() {
                 oldRight: Int,
                 oldBottom: Int
             ) {
-                val exclude = ArrayList<Rect>()
 
-                val excluded = Rect(750, 750, 800, 800)
-                exclude.add(excluded)
                 overlayPaintingView.getLocalVisibleRect(bounds)
-                touchHelper.setStrokeWidth(STROKE_WIDTH)?.setLimitRect(bounds, exclude)?.openRawDrawing()
-                touchHelper.setStrokeColor(Color.BLACK)
-                touchHelper.setStrokeStyle(TouchHelper.STROKE_STYLE_NEO_BRUSH)
+                touchHelper.setStrokeWidth(STROKE_WIDTH).setLimitRect(bounds, listOf())
                 touchHelper.setRawInputReaderEnable(!touchHelper.isRawDrawingInputEnabled)
                 overlayPaintingView.addOnLayoutChangeListener(this)
             }
@@ -206,13 +193,17 @@ class OverlayShowingService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         wm.removeView(overlayPaintingView)
+
+        // Reset the flag when the service is destroyed
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_IS_RUNNING, false).apply()
     }
 
 
     private val callback: RawInputCallback = object : RawInputCallback() {
         override fun onBeginRawDrawing(b: Boolean, touchPoint: TouchPoint?) {
             if (!enabledLiveWriting) {
-                touchHelper.setRawDrawingRenderEnabled(true)
+                touchHelper.isRawDrawingRenderEnabled = true
                 enabledLiveWriting = true
                 disableFingerTouch(applicationContext)
             }
@@ -236,7 +227,7 @@ class OverlayShowingService : Service() {
 
         override fun onPenUpRefresh(refreshRect: RectF?) {
             if (enabledLiveWriting) {
-                touchHelper.setRawDrawingRenderEnabled(false)
+                touchHelper.isRawDrawingRenderEnabled = false
                 enabledLiveWriting = false
             }
             super.onPenUpRefresh(refreshRect)
