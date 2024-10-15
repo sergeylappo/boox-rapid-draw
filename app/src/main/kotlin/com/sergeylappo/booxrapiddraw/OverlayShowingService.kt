@@ -13,7 +13,6 @@ import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
-import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.SurfaceView
@@ -21,6 +20,7 @@ import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.onyx.android.sdk.api.device.epd.EpdController
@@ -45,7 +45,6 @@ class OverlayShowingService : Service() {
     private val paint = Paint()
 
     private lateinit var touchHelper: TouchHelper
-    private lateinit var overlayButton: Button
     private lateinit var wm: WindowManager
     private lateinit var overlayPaintingView: SurfaceView
 
@@ -78,6 +77,7 @@ class OverlayShowingService : Service() {
         val isRunning = prefs.getBoolean(KEY_IS_RUNNING, false)
 
         if (isRunning) {
+            Toast.makeText(this, "Terminating Rapid Draw Service...", Toast.LENGTH_SHORT).show()
             stopSelf()
             return START_NOT_STICKY // Prevents service from being recreated
         }
@@ -85,6 +85,7 @@ class OverlayShowingService : Service() {
         // Set the flag to indicate that the service is now running
         prefs.edit().putBoolean(KEY_IS_RUNNING, true).apply()
 
+        Toast.makeText(this, "Starting Rapid Draw Service", Toast.LENGTH_SHORT).show()
         return START_STICKY // Service will be recreated if killed
     }
 
