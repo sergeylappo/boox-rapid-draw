@@ -105,7 +105,7 @@ class OverlayShowingService : Service() {
             this,
             0,
             Intent(this, OverlayShowingService::class.java).apply { action = "STOP" },
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
