@@ -19,7 +19,6 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -70,7 +69,6 @@ class OverlayShowingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "STOP") {
             stopSelf()
-            exitProcess(0)
         }
 
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
