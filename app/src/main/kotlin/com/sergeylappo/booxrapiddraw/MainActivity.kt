@@ -2,6 +2,8 @@ package com.sergeylappo.booxrapiddraw
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.app.Service.MODE_PRIVATE
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
 import com.onyx.android.sdk.utils.ActivityUtil.finish
+import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 import kotlin.system.exitProcess
 
 
@@ -32,31 +35,47 @@ class MainActivity : FragmentActivity() {
 }
 
 class MainFragment : Fragment() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         val requiresPermission = !canDrawOverlays(context)
         if (requiresPermission) {
             DisplayRationale().show(childFragmentManager, "permission_rationale")
         } else {
-            startService()
+            val context = requireContext()
+            val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            val isRunning = prefs.getBoolean(IS_RUNNING.key, false)
+            if (isRunning) {
+                stopService(context)
+            } else {
+                startService(context)
+            }
+            finish(this.activity)
         }
     }
 
-
-    private fun startService() {
+    private fun startService(context: Context) {
         val svc = Intent(context, OverlayShowingService::class.java)
         startForegroundService(requireContext(), svc)
-        finish(this.activity)
+    }
+
+    private fun stopService(context: Context) {
+        val svc = Intent(context, OverlayShowingService::class.java).apply { action = "STOP" }
+//      An attempt to start service second time would stop it.
+//        If a service was not running (e.g. force-closed this would not cause a crash
+//        since this does not tries to launch it as background)
+        context.startService(svc)
     }
 }
 
 class DisplayRationale : DialogFragment() {
     private lateinit var permissionRequestLauncher: ActivityResultLauncher<Intent>
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 //        TODO maybe can be even simpler with just starting the activity without the result
         permissionRequestLauncher = registerForActivityResult(StartActivityForResult()) { _ -> }
         return super.onCreateView(inflater, container, savedInstanceState)
@@ -67,24 +86,26 @@ class DisplayRationale : DialogFragment() {
         return activity?.let {
             // Use the Builder class for convenient dialog construction.
             val builder = AlertDialog.Builder(it)
-            builder.setMessage("""This app requires a permission to draw over other apps.
+            builder.setMessage(
+                """This app requires a permission to draw over other apps.
                 |Now you would be redirected to settings to enable the permission.
                 |To enable, select "Boox Rapid Draw" and then toggle "Allow display over other apps" option.
                 |
                 |NOTE:
                 |If you deny the permission, the app will not be able to function and would be closed.
-            """.trimMargin())
-               .setPositiveButton("Allow") { _, _ ->
-                   val requestPermissionIntent = Intent(ACTION_MANAGE_OVERLAY_PERMISSION)
-                   requestPermissionIntent.setData(Uri.parse("package:${requireContext().packageName}"))
-                   permissionRequestLauncher.launch(requestPermissionIntent)
+            """.trimMargin()
+            )
+                .setPositiveButton("Allow") { _, _ ->
+                    val requestPermissionIntent = Intent(ACTION_MANAGE_OVERLAY_PERMISSION)
+                    requestPermissionIntent.setData(Uri.parse("package:${requireContext().packageName}"))
+                    permissionRequestLauncher.launch(requestPermissionIntent)
                 }
-               .setNegativeButton("Close app") { _, _ ->
+                .setNegativeButton("Close app") { _, _ ->
                     exitProcess(0)
                 }
             // Create the AlertDialog object and return it.
             builder.create()
-        }?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 
     override fun onDestroy() {
