@@ -27,6 +27,19 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="This app needs to be able to display itself over other APPs to emulate quick draw."/>
         </service>
+        <service
+            android:name=".RapidDrawTileService"
+            android:exported="true"
+            android:label="Rapid Draw"
+            android:icon="@drawable/rapid_draw"
+            android:roundIcon="@drawable/rapid_draw"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+        <intent-filter>
+            <action android:name="android.service.quicksettings.action.QS_TILE" />
+        </intent-filter>
+    </service>
     </application>
 
 </manifest>
