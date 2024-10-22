@@ -27,7 +27,7 @@ import com.onyx.android.sdk.data.note.TouchPoint
 import com.onyx.android.sdk.pen.RawInputCallback
 import com.onyx.android.sdk.pen.TouchHelper
 import com.onyx.android.sdk.pen.data.TouchPointList
-import kotlin.system.exitProcess
+import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 
 private const val CHANNEL_ID = "rapid_draw_channel_overlay_01"
 private const val STROKE_WIDTH = 3.0f
@@ -35,12 +35,6 @@ private const val STROKE_WIDTH = 3.0f
 //TODO need to detect pen-up event to increase responsiveness, so that can start raw drawing while reading that pen is near
 //Or would require schedule or timer to clean-up after retrieving a pen-down event
 class OverlayShowingService : Service() {
-
-    companion object {
-        private const val PREFS_NAME = "MyServicePrefs"
-        private const val KEY_IS_RUNNING = "isRunning"
-    }
-
     private val paint = Paint()
 
     private lateinit var touchHelper: TouchHelper
@@ -68,20 +62,14 @@ class OverlayShowingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "STOP") {
-            stopSelf()
-        }
-
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val isRunning = prefs.getBoolean(KEY_IS_RUNNING, false)
-
-        if (isRunning) {
             Toast.makeText(this, "Terminating Rapid Draw Service...", Toast.LENGTH_SHORT).show()
             stopSelf()
             return START_NOT_STICKY // Prevents service from being recreated
         }
 
         // Set the flag to indicate that the service is now running
-        prefs.edit().putBoolean(KEY_IS_RUNNING, true).apply()
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs.edit().putBoolean(IS_RUNNING.key, true).apply()
 
         Toast.makeText(this, "Starting Rapid Draw Service", Toast.LENGTH_SHORT).show()
         return START_STICKY // Service will be recreated if killed
@@ -94,7 +82,7 @@ class OverlayShowingService : Service() {
             NotificationChannel(
                 CHANNEL_ID,
                 "Boox Rapid draw overlay service",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             )
         )
 
@@ -110,7 +98,7 @@ class OverlayShowingService : Service() {
             .setContentTitle(getString(R.string.overlay_service_notification_content_title))
             .setContentText(getString(R.string.overlay_service_notification_content))
             .setSmallIcon(R.drawable.rapid_draw)
-            .setContentIntent(pendingIntent)
+            .addAction(NotificationCompat.Action.Builder(null, "Stop", pendingIntent).build())
             .build()
 
         //noinspection InlinedApi (Seems to work, IDK why, maybe older Android versions might not support this)
@@ -154,7 +142,6 @@ class OverlayShowingService : Service() {
         paint.strokeWidth = STROKE_WIDTH
     }
 
-
     //    TODO fix suppress
     @SuppressLint("ClickableViewAccessibility")
     private fun initSurfaceView() {
@@ -195,7 +182,7 @@ class OverlayShowingService : Service() {
 
         // Reset the flag when the service is destroyed
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        prefs.edit().putBoolean(KEY_IS_RUNNING, false).apply()
+        prefs.edit().putBoolean(IS_RUNNING.key, false).apply()
     }
 
 
