@@ -19,6 +19,10 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+import android.view.WindowManager.LayoutParams.WRAP_CONTENT
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -32,8 +36,8 @@ import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 private const val CHANNEL_ID = "rapid_draw_channel_overlay_01"
 private const val STROKE_WIDTH = 3.0f
 
-//TODO need to detect pen-up event to increase responsiveness, so that can start raw drawing while reading that pen is near
-//Or would require schedule or timer to clean-up after retrieving a pen-down event
+// TODO need to detect pen-up event to increase responsiveness, so that can start raw drawing while reading that pen is near
+// Or would require schedule or timer to clean-up after retrieving a pen-down event
 class OverlayShowingService : Service() {
     private val paint = Paint()
 
@@ -43,7 +47,6 @@ class OverlayShowingService : Service() {
 
     @Volatile
     private var enabledLiveWriting: Boolean = false
-
 
     override fun onBind(intent: Intent) = null
 
@@ -112,10 +115,10 @@ class OverlayShowingService : Service() {
         overlayPaintingView.alpha = 1.0f
 
         val topLeftParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WRAP_CONTENT,
+            WRAP_CONTENT,
+            TYPE_APPLICATION_OVERLAY,
+            FLAG_NOT_FOCUSABLE or FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSPARENT
         )
         topLeftParams.alpha = 0.2f
@@ -133,7 +136,6 @@ class OverlayShowingService : Service() {
         topLeftParams.height = bounds.height() - 30
         wm.addView(overlayPaintingView, topLeftParams)
     }
-
 
     private fun initPaint() {
         paint.isAntiAlias = true
@@ -165,7 +167,6 @@ class OverlayShowingService : Service() {
                 oldRight: Int,
                 oldBottom: Int
             ) {
-
                 overlayPaintingView.getLocalVisibleRect(bounds)
                 touchHelper.setStrokeWidth(STROKE_WIDTH).setLimitRect(bounds, listOf())
                 touchHelper.setRawInputReaderEnable(!touchHelper.isRawDrawingInputEnabled)
@@ -184,7 +185,6 @@ class OverlayShowingService : Service() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         prefs.edit().putBoolean(IS_RUNNING.key, false).apply()
     }
-
 
     private val callback: RawInputCallback = object : RawInputCallback() {
         override fun onBeginRawDrawing(b: Boolean, touchPoint: TouchPoint?) {
@@ -220,7 +220,6 @@ class OverlayShowingService : Service() {
         }
     }
 }
-
 
 private fun disableFingerTouch(context: Context) {
     val width = context.resources.displayMetrics.widthPixels

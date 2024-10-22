@@ -7,6 +7,7 @@ kotlin = "1.9.0"
 onyxDevice = "1.2.30"
 onyxPen = "1.4.11"
 window = "1.3.0"
+spotless = "6.25.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -20,6 +21,7 @@ onyx-pen = { group = "com.onyx.android.sdk", name = "onyxsdk-pen", version.ref =
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless"}
 
 [bundles]
 onyx = ["onyx-device", "onyx-pen"]

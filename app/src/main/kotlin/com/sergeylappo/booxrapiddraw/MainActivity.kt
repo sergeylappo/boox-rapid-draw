@@ -23,7 +23,6 @@ import com.onyx.android.sdk.utils.ActivityUtil.finish
 import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 import kotlin.system.exitProcess
 
-
 class MainActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
@@ -81,7 +80,6 @@ class DisplayRationale : DialogFragment() {
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             // Use the Builder class for convenient dialog construction.
@@ -93,11 +91,13 @@ class DisplayRationale : DialogFragment() {
                 |
                 |NOTE:
                 |If you deny the permission, the app will not be able to function and would be closed.
-            """.trimMargin()
+                """.trimMargin()
             )
                 .setPositiveButton("Allow") { _, _ ->
                     val requestPermissionIntent = Intent(ACTION_MANAGE_OVERLAY_PERMISSION)
-                    requestPermissionIntent.setData(Uri.parse("package:${requireContext().packageName}"))
+                    requestPermissionIntent.setData(
+                        Uri.parse("package:${requireContext().packageName}")
+                    )
                     permissionRequestLauncher.launch(requestPermissionIntent)
                 }
                 .setNegativeButton("Close app") { _, _ ->
