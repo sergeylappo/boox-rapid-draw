@@ -6,12 +6,10 @@ plugins {
 
 spotless {
     kotlin {
-        // version, editorConfigPath, editorConfigOverride and customRuleSets are all optional
         target("**/src/**/*.kt")
         ktlint()
             .editorConfigOverride(
                 mapOf(
-                    // intellij_idea is the default style we preset in Spotless, you can override it referring to https://pinterest.github.io/ktlint/latest/rules/code-styles.
                     "ktlint_code_style" to "android_studio",
                 )
             )
