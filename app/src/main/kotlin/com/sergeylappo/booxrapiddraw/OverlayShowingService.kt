@@ -179,7 +179,8 @@ class OverlayShowingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        wm.removeView(overlayPaintingView)
+        wm.removeViewImmediate(overlayPaintingView)
+        touchHelper.closeRawDrawing()
 
         // Reset the flag when the service is destroyed
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
