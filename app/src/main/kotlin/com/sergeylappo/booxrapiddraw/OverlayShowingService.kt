@@ -148,9 +148,6 @@ class OverlayShowingService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSurfaceView() {
         touchHelper = TouchHelper.create(overlayPaintingView, 2, callback)
-        touchHelper.setStrokeColor(Color.BLACK)
-        touchHelper.setStrokeStyle(TouchHelper.STROKE_STYLE_PENCIL)
-        touchHelper.openRawDrawing()
 
         val displayMetrics = resources.displayMetrics
         val bounds = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
@@ -168,6 +165,9 @@ class OverlayShowingService : Service() {
                 oldBottom: Int
             ) {
                 overlayPaintingView.getLocalVisibleRect(bounds)
+                touchHelper.setStrokeColor(Color.BLACK)
+                touchHelper.setStrokeStyle(TouchHelper.STROKE_STYLE_PENCIL)
+                touchHelper.openRawDrawing()
                 touchHelper.setStrokeWidth(STROKE_WIDTH).setLimitRect(bounds, listOf())
                 touchHelper.setRawInputReaderEnable(!touchHelper.isRawDrawingInputEnabled)
                 overlayPaintingView.addOnLayoutChangeListener(this)
