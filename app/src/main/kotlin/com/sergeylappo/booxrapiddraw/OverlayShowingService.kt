@@ -21,8 +21,8 @@ import android.view.View.OnLayoutChangeListener
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+import android.view.WindowManager.LayoutParams.MATCH_PARENT
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-import android.view.WindowManager.LayoutParams.WRAP_CONTENT
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -115,8 +115,8 @@ class OverlayShowingService : Service() {
         overlayPaintingView.alpha = 1.0f
 
         val topLeftParams = WindowManager.LayoutParams(
-            WRAP_CONTENT,
-            WRAP_CONTENT,
+            MATCH_PARENT,
+            MATCH_PARENT,
             TYPE_APPLICATION_OVERLAY,
             FLAG_NOT_FOCUSABLE or FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSPARENT
@@ -132,8 +132,6 @@ class OverlayShowingService : Service() {
         topLeftParams.x = bounds.left
         topLeftParams.y = bounds.top
 
-        topLeftParams.width = bounds.width()
-        topLeftParams.height = bounds.height() - 30
         wm.addView(overlayPaintingView, topLeftParams)
     }
 
@@ -148,10 +146,6 @@ class OverlayShowingService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSurfaceView() {
         touchHelper = TouchHelper.create(overlayPaintingView, 2, callback)
-
-        val displayMetrics = resources.displayMetrics
-        val bounds = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-
         overlayPaintingView.addOnLayoutChangeListener(object : OnLayoutChangeListener {
             override fun onLayoutChange(
                 v: View,
@@ -164,6 +158,7 @@ class OverlayShowingService : Service() {
                 oldRight: Int,
                 oldBottom: Int
             ) {
+                val bounds = Rect(0, 0, right, bottom)
                 overlayPaintingView.getLocalVisibleRect(bounds)
                 touchHelper.setStrokeColor(Color.BLACK)
                 touchHelper.setStrokeStyle(TouchHelper.STROKE_STYLE_PENCIL)
