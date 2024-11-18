@@ -13,6 +13,9 @@ import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
+import android.hardware.Sensor
+import android.hardware.SensorManager
+import android.os.PowerManager
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.SurfaceView
@@ -26,27 +29,26 @@ import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import com.onyx.android.sdk.api.device.epd.EpdController
 import com.onyx.android.sdk.data.note.TouchPoint
+import com.onyx.android.sdk.device.Device
+import com.onyx.android.sdk.pen.EpdPenManager
 import com.onyx.android.sdk.pen.RawInputCallback
 import com.onyx.android.sdk.pen.TouchHelper
 import com.onyx.android.sdk.pen.data.TouchPointList
+import com.onyx.android.sdk.pen.touch.AppTouchRender
+import com.onyx.android.sdk.pen.touch.SFTouchRender
+import com.onyx.android.sdk.pen.touch.TouchRender
 import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 
 private const val CHANNEL_ID = "rapid_draw_channel_overlay_01"
 private const val STROKE_WIDTH = 3.0f
 
-// TODO need to detect pen-up event to increase responsiveness, so that can start raw drawing while reading that pen is near
-// Or would require schedule or timer to clean-up after retrieving a pen-down event
 class OverlayShowingService : Service() {
     private val paint = Paint()
 
     private lateinit var touchHelper: TouchHelper
     private lateinit var wm: WindowManager
     private lateinit var overlayPaintingView: SurfaceView
-
-    @Volatile
-    private var enabledLiveWriting: Boolean = false
 
     override fun onBind(intent: Intent) = null
 
@@ -146,6 +148,7 @@ class OverlayShowingService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSurfaceView() {
         touchHelper = TouchHelper.create(overlayPaintingView, 2, callback)
+        touchHelper.setPenUpRefreshTimeMs(1000)
         overlayPaintingView.addOnLayoutChangeListener(object : OnLayoutChangeListener {
             override fun onLayoutChange(
                 v: View,
@@ -183,19 +186,15 @@ class OverlayShowingService : Service() {
     }
 
     private val callback: RawInputCallback = object : RawInputCallback() {
-        override fun onBeginRawDrawing(b: Boolean, touchPoint: TouchPoint?) {
-            if (!enabledLiveWriting) {
-                touchHelper.isRawDrawingRenderEnabled = true
-                enabledLiveWriting = true
-                disableFingerTouch(applicationContext)
-            }
-        }
+        override fun onBeginRawDrawing(b: Boolean, touchPoint: TouchPoint?) {}
 
-        override fun onEndRawDrawing(b: Boolean, touchPoint: TouchPoint?) {
-            enableFingerTouch(applicationContext)
-        }
+        override fun onEndRawDrawing(b: Boolean, touchPoint: TouchPoint?) {}
 
         override fun onRawDrawingTouchPointMoveReceived(touchPoint: TouchPoint?) {}
+
+        override fun onPenActive(point: TouchPoint?) {
+            touchHelper.setRawDrawingEnabled(true)
+        }
 
         override fun onRawDrawingTouchPointListReceived(touchPointList: TouchPointList) {}
 
@@ -208,23 +207,8 @@ class OverlayShowingService : Service() {
         override fun onRawErasingTouchPointListReceived(touchPointList: TouchPointList?) {}
 
         override fun onPenUpRefresh(refreshRect: RectF?) {
-            if (enabledLiveWriting) {
-                touchHelper.isRawDrawingRenderEnabled = false
-                enabledLiveWriting = false
-            }
+            touchHelper.isRawDrawingRenderEnabled = false
             super.onPenUpRefresh(refreshRect)
         }
     }
-}
-
-private fun disableFingerTouch(context: Context) {
-    val width = context.resources.displayMetrics.widthPixels
-    val height = context.resources.displayMetrics.heightPixels
-    val rect = Rect(0, 0, width, height)
-    val arrayRect = arrayOf(rect)
-    EpdController.setAppCTPDisableRegion(context, arrayRect)
-}
-
-private fun enableFingerTouch(context: Context) {
-    EpdController.appResetCTPDisableRegion(context)
 }
