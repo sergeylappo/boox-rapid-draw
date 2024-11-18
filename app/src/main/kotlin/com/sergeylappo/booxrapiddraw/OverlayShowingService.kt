@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.graphics.Color
@@ -13,9 +12,6 @@ import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import android.os.PowerManager
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.SurfaceView
@@ -30,14 +26,9 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.onyx.android.sdk.data.note.TouchPoint
-import com.onyx.android.sdk.device.Device
-import com.onyx.android.sdk.pen.EpdPenManager
 import com.onyx.android.sdk.pen.RawInputCallback
 import com.onyx.android.sdk.pen.TouchHelper
 import com.onyx.android.sdk.pen.data.TouchPointList
-import com.onyx.android.sdk.pen.touch.AppTouchRender
-import com.onyx.android.sdk.pen.touch.SFTouchRender
-import com.onyx.android.sdk.pen.touch.TouchRender
 import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 
 private const val CHANNEL_ID = "rapid_draw_channel_overlay_01"
