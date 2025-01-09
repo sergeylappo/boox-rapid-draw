@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.2"
+agp = "8.7.2"
 coreKtx = "1.13.1"
 fragment = "1.8.4"
 hiddenapibypass = "4.3"
