@@ -22,7 +22,6 @@ import com.onyx.android.sdk.utils.ActivityUtil.finish
 import com.sergeylappo.booxrapiddraw.utils.isMyServiceRunning
 import kotlin.system.exitProcess
 
-
 class MainActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()

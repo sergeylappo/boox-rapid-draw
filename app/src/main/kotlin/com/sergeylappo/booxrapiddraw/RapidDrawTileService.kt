@@ -10,7 +10,6 @@ import androidx.core.service.quicksettings.PendingIntentActivityWrapper
 import androidx.core.service.quicksettings.TileServiceCompat
 import com.sergeylappo.booxrapiddraw.utils.isMyServiceRunning
 
-
 class RapidDrawTileService : TileService() {
     // Called when your app can update your tile.
     override fun onStartListening() {
