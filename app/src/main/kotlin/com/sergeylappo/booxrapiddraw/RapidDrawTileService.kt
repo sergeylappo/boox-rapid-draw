@@ -8,7 +8,8 @@ import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.service.quicksettings.TileService
 import androidx.core.service.quicksettings.PendingIntentActivityWrapper
 import androidx.core.service.quicksettings.TileServiceCompat
-import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
+import com.sergeylappo.booxrapiddraw.utils.isMyServiceRunning
+
 
 class RapidDrawTileService : TileService() {
     // Called when your app can update your tile.
@@ -43,12 +44,11 @@ class RapidDrawTileService : TileService() {
     }
 
     private fun getCurrentState(): Int {
-        val prefs = applicationContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val isRunning = prefs.getBoolean(IS_RUNNING.key, false)
+        val isRunning = isMyServiceRunning(this, OverlayShowingService::class.java)
         return if (isRunning) {
-            STATE_INACTIVE
-        } else {
             STATE_ACTIVE
+        } else {
+            STATE_INACTIVE
         }
     }
 }

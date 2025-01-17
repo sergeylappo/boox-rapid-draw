@@ -2,7 +2,6 @@ package com.sergeylappo.booxrapiddraw
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.app.Service.MODE_PRIVATE
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -20,8 +19,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
 import com.onyx.android.sdk.utils.ActivityUtil.finish
-import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
+import com.sergeylappo.booxrapiddraw.utils.isMyServiceRunning
 import kotlin.system.exitProcess
+
 
 class MainActivity : FragmentActivity() {
     override fun onResume() {
@@ -42,8 +42,7 @@ class MainFragment : Fragment() {
             DisplayRationale().show(childFragmentManager, "permission_rationale")
         } else {
             val context = requireContext()
-            val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-            val isRunning = prefs.getBoolean(IS_RUNNING.key, false)
+            val isRunning = isMyServiceRunning(requireContext(), OverlayShowingService::class.java)
             if (isRunning) {
                 stopService(context)
             } else {

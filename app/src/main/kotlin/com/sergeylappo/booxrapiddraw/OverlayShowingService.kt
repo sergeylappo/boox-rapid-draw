@@ -29,7 +29,6 @@ import com.onyx.android.sdk.data.note.TouchPoint
 import com.onyx.android.sdk.pen.RawInputCallback
 import com.onyx.android.sdk.pen.TouchHelper
 import com.onyx.android.sdk.pen.data.TouchPointList
-import com.sergeylappo.booxrapiddraw.PreferenceKey.IS_RUNNING
 
 private const val CHANNEL_ID = "rapid_draw_channel_overlay_01"
 private const val STROKE_WIDTH = 3.0f
@@ -62,10 +61,6 @@ class OverlayShowingService : Service() {
             stopSelf()
             return START_NOT_STICKY // Prevents service from being recreated
         }
-
-        // Set the flag to indicate that the service is now running
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        prefs.edit().putBoolean(IS_RUNNING.key, true).apply()
 
         Toast.makeText(this, "Starting Rapid Draw Service", Toast.LENGTH_SHORT).show()
         return START_STICKY // Service will be recreated if killed
@@ -170,10 +165,6 @@ class OverlayShowingService : Service() {
         super.onDestroy()
         wm.removeViewImmediate(overlayPaintingView)
         touchHelper.closeRawDrawing()
-
-        // Reset the flag when the service is destroyed
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        prefs.edit().putBoolean(IS_RUNNING.key, false).apply()
     }
 
     private val callback: RawInputCallback = object : RawInputCallback() {

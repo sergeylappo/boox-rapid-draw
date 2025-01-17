@@ -34,8 +34,6 @@
             android:icon="@drawable/rapid_draw"
             android:roundIcon="@drawable/rapid_draw"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
-                android:value="true" />
         <intent-filter>
             <action android:name="android.service.quicksettings.action.QS_TILE" />
         </intent-filter>
