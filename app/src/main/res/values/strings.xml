@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">Boox Rapid Draw</string>
     <string name="exit">Exit</string>
-    <string name="overlay_service_notification_content_title">Boox rapid draw overlay</string>
-    <string name="overlay_service_notification_content">Overlay enabled</string>
+    <string name="overlay_service_notification_content_title">Boox Rapid Draw Overlay</string>
+    <string name="overlay_service_notification_content">Overlay Enabled!</string>
 
 
     <!-- New strings -->
     <string name="overlay_permission_rationale">
-        This app requires permission to draw over other apps.
-        You will be redirected to settings to enable this permission. 
-        To enable, select "Boox Rapid Draw" and then toggle "Allow display over other apps" option. 
+        This app requires permission to draw over other apps.\n
+        You will be redirected to settings to enable this permission.\n
+        To enable, select "Boox Rapid Draw" and then toggle "Allow display over other apps" option.\n
         If you deny the permission, the app will not function and will close.
     </string>
     <string name="allow">Allow</string>
