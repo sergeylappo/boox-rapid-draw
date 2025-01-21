@@ -26,8 +26,9 @@ class MainActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
 
+        // Replace fragment to ensure only one instance exists
         supportFragmentManager.commit {
-            add(MainFragment(), "main_fragment")
+            replace(android.R.id.content, MainFragment(), "main_fragment")
         }
     }
 }
