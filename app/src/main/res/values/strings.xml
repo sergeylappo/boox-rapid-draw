@@ -7,7 +7,10 @@
 
     <!-- New strings -->
     <string name="overlay_permission_rationale">
-        This app requires permission to draw over other apps. You will be redirected to settings to enable this permission. If you deny the permission, the app will not function and will close.
+        This app requires permission to draw over other apps.
+        You will be redirected to settings to enable this permission. 
+        To enable, select "Boox Rapid Draw" and then toggle "Allow display over other apps" option. 
+        If you deny the permission, the app will not function and will close.
     </string>
     <string name="allow">Allow</string>
     <string name="close_app">Close App</string>

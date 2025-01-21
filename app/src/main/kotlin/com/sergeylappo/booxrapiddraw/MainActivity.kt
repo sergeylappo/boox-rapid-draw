@@ -96,23 +96,15 @@ class DisplayRationale : DialogFragment() {
         return activity?.let {
             // Use the Builder class for convenient dialog construction.
             val builder = AlertDialog.Builder(it)
-            builder.setMessage(
-                """This app requires a permission to draw over other apps.
-                |Now you would be redirected to settings to enable the permission.
-                |To enable, select "Boox Rapid Draw" and then toggle "Allow display over other apps" option.
-                |
-                |NOTE:
-                |If you deny the permission, the app will not be able to function and would be closed.
-                """.trimMargin()
-            )
-                .setPositiveButton("Allow") { _, _ ->
+            builder.setMessage(getString(R.string.overlay_permission_rationale))
+                .setPositiveButton(getString(R.string.allow)) { _, _ ->
                     val requestPermissionIntent = Intent(ACTION_MANAGE_OVERLAY_PERMISSION)
                     requestPermissionIntent.setData(
                         Uri.parse("package:${requireContext().packageName}")
                     )
                     permissionRequestLauncher.launch(requestPermissionIntent)
                 }
-                .setNegativeButton("Close app") { _, _ ->
+                .setNegativeButton(getString(R.string.close_app)) { _, _ ->
                     exitProcess(0)
                 }
             // Create the AlertDialog object and return it.
