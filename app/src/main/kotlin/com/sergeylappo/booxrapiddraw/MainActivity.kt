@@ -97,6 +97,8 @@ class DisplayRationale : DialogFragment() {
             // Use the Builder class for convenient dialog construction.
             val builder = AlertDialog.Builder(it)
             builder.setMessage(getString(R.string.overlay_permission_rationale))
+
+                // Launch the overlay permission settings
                 .setPositiveButton(getString(R.string.allow)) { _, _ ->
                     val requestPermissionIntent = Intent(ACTION_MANAGE_OVERLAY_PERMISSION)
                     requestPermissionIntent.setData(
@@ -104,9 +106,12 @@ class DisplayRationale : DialogFragment() {
                     )
                     permissionRequestLauncher.launch(requestPermissionIntent)
                 }
+
+                // Exit the app if permission is denied
                 .setNegativeButton(getString(R.string.close_app)) { _, _ ->
                     exitProcess(0)
                 }
+                
             // Create the AlertDialog object and return it.
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
