@@ -3,4 +3,18 @@
     <string name="exit">Exit</string>
     <string name="overlay_service_notification_content_title">Boox rapid draw overlay</string>
     <string name="overlay_service_notification_content">Overlay enabled</string>
+
+
+    <!-- New strings -->
+    <string name="overlay_permission_rationale">
+        This app requires permission to draw over other apps. You will be redirected to settings to enable this permission. If you deny the permission, the app will not function and will close.
+    </string>
+    <string name="allow">Allow</string>
+    <string name="close_app">Close App</string>
+    <string name="permission_denied_message">Permission not granted. Exiting the app.</string>
+    <string name="stop_service_action">Stop</string>
+    <string name="service_starting_message">Starting Rapid Draw Service</string>
+    <string name="service_stopping_message">Stopping Rapid Draw Service...</string>
+    <string name="service_failed_message">Failed to toggle Rapid Draw Service</string>
+
 </resources>
