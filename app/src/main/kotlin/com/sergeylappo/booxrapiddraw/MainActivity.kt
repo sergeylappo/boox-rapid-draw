@@ -37,19 +37,32 @@ class MainFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val context = requireContext()
+
+        // Check if the overlay permission is granted
         val requiresPermission = !canDrawOverlays(context)
+
+        // Ask for premission if needed, otherwise we toggle the OverlayShowingService
         if (requiresPermission) {
             DisplayRationale().show(childFragmentManager, "permission_rationale")
         } else {
-            val context = requireContext()
-            val isRunning = isMyServiceRunning(requireContext(), OverlayShowingService::class.java)
-            if (isRunning) {
-                stopService(context)
-            } else {
-                startService(context)
-            }
-            finish(this.activity)
+            toggleService(context)
         }
+
+    }
+
+    fun toggleService(context: Context) {
+        val isRunning = isMyServiceRunning(context, OverlayShowingService::class.java)
+
+        // Start or stop service based on current state
+        if (isRunning) {
+            stopService(context)
+        } else {
+            startService(context)
+        }
+
+        // Close the activity after toggling the service
+        finish(this.activity)
     }
 
     private fun startService(context: Context) {
