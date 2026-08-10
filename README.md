@@ -6,7 +6,7 @@ Q: **How to install the APP?** <br>
 <details>
   <summary>A: Android and the APP would guide you through the installation process, but detailed manual is under the spoiler</summary>
   
-  1. Download the APK
+  1. Download the APK.  In plain english this means the following: go the github page for boox-rapid-draw, scroll down to 'releases' and click on 'releases', click on v0.0.6 or latest version to download the app. 
   2. Click on it
   3. Accept that you agree that app might be dangerous for your device
   4. Click install
