@@ -26,8 +26,9 @@ class MainActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
 
+        // Replace fragment to ensure only one instance exists
         supportFragmentManager.commit {
-            add(MainFragment(), "main_fragment")
+            replace(android.R.id.content, MainFragment(), "main_fragment")
         }
     }
 }
@@ -36,19 +37,32 @@ class MainFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val context = requireContext()
+
+        // Check if the overlay permission is granted
         val requiresPermission = !canDrawOverlays(context)
+
+        // Ask for premission if needed, otherwise we toggle the OverlayShowingService
         if (requiresPermission) {
             DisplayRationale().show(childFragmentManager, "permission_rationale")
         } else {
-            val context = requireContext()
-            val isRunning = isMyServiceRunning(requireContext(), OverlayShowingService::class.java)
-            if (isRunning) {
-                stopService(context)
-            } else {
-                startService(context)
-            }
-            finish(this.activity)
+            toggleService(context)
         }
+
+    }
+
+    fun toggleService(context: Context) {
+        val isRunning = isMyServiceRunning(context, OverlayShowingService::class.java)
+
+        // Start or stop service based on current state
+        if (isRunning) {
+            stopService(context)
+        } else {
+            startService(context)
+        }
+
+        // Close the activity after toggling the service
+        finish(this.activity)
     }
 
     private fun startService(context: Context) {
@@ -82,25 +96,22 @@ class DisplayRationale : DialogFragment() {
         return activity?.let {
             // Use the Builder class for convenient dialog construction.
             val builder = AlertDialog.Builder(it)
-            builder.setMessage(
-                """This app requires a permission to draw over other apps.
-                |Now you would be redirected to settings to enable the permission.
-                |To enable, select "Boox Rapid Draw" and then toggle "Allow display over other apps" option.
-                |
-                |NOTE:
-                |If you deny the permission, the app will not be able to function and would be closed.
-                """.trimMargin()
-            )
-                .setPositiveButton("Allow") { _, _ ->
+            builder.setMessage(getString(R.string.overlay_permission_rationale))
+
+                // Launch the overlay permission settings
+                .setPositiveButton(getString(R.string.allow)) { _, _ ->
                     val requestPermissionIntent = Intent(ACTION_MANAGE_OVERLAY_PERMISSION)
                     requestPermissionIntent.setData(
                         Uri.parse("package:${requireContext().packageName}")
                     )
                     permissionRequestLauncher.launch(requestPermissionIntent)
                 }
-                .setNegativeButton("Close app") { _, _ ->
+
+                // Exit the app if permission is denied
+                .setNegativeButton(getString(R.string.close_app)) { _, _ ->
                     exitProcess(0)
                 }
+                
             // Create the AlertDialog object and return it.
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
